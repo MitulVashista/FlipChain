@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "./FlipToken.sol";
+import "./token.sol";
 
 contract FlipKart {
     address private token;
