@@ -1,7 +1,6 @@
-//SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "./token.sol";
+import "./Token.sol";
 
 contract FlipKart {
     address private tokenContract;
@@ -43,6 +42,7 @@ contract FlipKart {
     constructor() {
         tokenContract = address(new FlipToken());
         owner = msg.sender;
+        FlipToken(tokenContract).mint(100);
     }
 
     modifier onlyOwner() {
@@ -135,5 +135,8 @@ contract FlipKart {
         brand.wallet += finalPrice;  
 
         emit ProductBought(msg.sender, user.name, brand.brandAddress, brand.name, _productName, finalPrice, discountTokens, tokenEarned);    
+    }
+    function showBalance(address account) public view returns(uint) {
+        return FlipToken(tokenContract).balanceOf(account);
     }
 }
