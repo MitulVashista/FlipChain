@@ -6,11 +6,26 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract FlipToken is ERC20("FlipCoin", "FPC"), Ownable{
 
-    function mint(address account, uint256 amount) public {
-        _mint(account, amount);
+    function mint(uint256 amount) public onlyOwner {
+        _mint(msg.sender, amount);
     }
 
-    function burn(address account, uint256 amount) public {
-        _burn(account, amount);
+    function transfer(address to, uint256 value) public onlyOwner virtual override  returns (bool) {
+        address owner = _msgSender();
+        _transfer(owner, to, value);
+        return true;
+    }
+
+    function approve(address owner, uint256 value) public onlyOwner virtual override  returns (bool) {
+        address spender = _msgSender();
+        _approve(owner, spender, value);
+        return true;
+    }
+
+    function transferFrom(address from, address to, uint256 value) public onlyOwner virtual override returns (bool) {
+        address spender = _msgSender();
+        _spendAllowance(from, spender, value);
+        _transfer(from, to, value);
+        return true;
     }
 }

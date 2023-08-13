@@ -94,8 +94,8 @@ contract FlipKart {
         require(brand.brandAddress != address(0), "Brand not found");
         
         uint256 productId = brand.productsByName[_productName];
-        require(productId < brand.productCount, "Invalid product name");
-        
+        require(productId != 0, "Product not found");
+                
         User storage user = users[msg.sender];
         Product storage product = brand.products[productId];
 
@@ -123,11 +123,12 @@ contract FlipKart {
         uint256 tokenEarned = finalPrice / 10;
 
         if (discountTokens > tokenEarned) {
-            FlipToken(tokenContract).burn(msg.sender, discountTokens - tokenEarned);
+            FlipToken(tokenContract).approve(msg.sender, discountTokens - tokenEarned);
+            FlipToken(tokenContract).transferFrom(msg.sender, address(this), discountTokens - tokenEarned);
         }
 
         else {
-            FlipToken(tokenContract).mint(msg.sender, tokenEarned - discountTokens);
+            FlipToken(tokenContract).transfer(msg.sender, tokenEarned - discountTokens);
         }      
         
         user.wallet -= finalPrice;
