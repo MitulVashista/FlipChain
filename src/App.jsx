@@ -4,6 +4,10 @@ import PageNotFound from "../pages/PageNotFound";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Toaster } from "react-hot-toast";
+import Products from "../pages/Products";
+import Product from "../pages/Product";
+import Rewards from "../pages/Rewards";
+import Landing from "../pages/Landing";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -20,7 +24,11 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route element={<AppLayout />}>
-            <Route></Route>
+            <Route index path="/" element={<Landing />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="products/:id" element={<Product />} />
+            <Route path="rewards" element={<Rewards />} />
+            <Route path="/user" />
           </Route>
           <Route path="*" element={<PageNotFound />} />
         </Routes>
