@@ -5,6 +5,10 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite + React</title>
+    <script>
+      // Required by some npm packages
+      window.process = { browser: true, env: { ENVIRONMENT: 'BROWSER' } };
+  </script>
   </head>
   <body>
     <div id="root"></div>
