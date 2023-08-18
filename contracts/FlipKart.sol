@@ -59,6 +59,7 @@ contract FlipKart {
 
     string[] public brands;
     mapping(string => Brand) public brandDetails;
+    mapping(address => string) brandIds;
     mapping(string => mapping(string => Product)) public productDetails;
     mapping(address => User) public userDetails;
     mapping(string => mapping(string => uint)) userBrandPurchaseAmount;
@@ -82,7 +83,7 @@ contract FlipKart {
             uint8 randomValue = uint8(
                 uint256(
                     keccak256(
-                        abi.encodePacked(block.timestamp, block.prevrandao, i)
+                        abi.encodePacked(block.timestamp, block.difficulty, i)
                     )
                 ) % 10
             );
@@ -103,6 +104,7 @@ contract FlipKart {
             32
         );
         require(brandDetails[id].owner != msg.sender);
+        require(userDetails[msg.sender].account == address(0));
         brands.push(id);
         brandDetails[id].id = id;
         brandDetails[id].name = name;
@@ -110,6 +112,7 @@ contract FlipKart {
         brandDetails[id].owner = payable(msg.sender);
         brandDetails[id].rewardPricePercentage = rewardPricePercentage;
         brandDetails[id].rewardMilestones = rewardMilestones;
+        brandIds[msg.sender] = id;
     }
 
     function issueTokens(string memory brandId, uint tokens) public {
@@ -147,6 +150,9 @@ contract FlipKart {
 
     function registerUser(string memory name, string memory _referral) public {
         require(userDetails[msg.sender].account == address(0));
+        require(
+            brandDetails[brandIds[msg.sender]].owner == payable(address(0))
+        );
         string memory id = Strings.toHexString(
             uint256(keccak256(abi.encodePacked(msg.sender))),
             32

@@ -13,6 +13,10 @@ dist
 dist-ssr
 *.local
 
+# Hardhat files 
+cache
+artifacts
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

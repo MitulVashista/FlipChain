@@ -8,6 +8,10 @@ import Products from "../pages/Products";
 import Product from "../pages/Product";
 import Rewards from "../pages/Rewards";
 import Landing from "../pages/Landing";
+import UserDashboard from "../pages/UserDashboard";
+import BrandRegistrationForm from "../features/brands/BrandRegistrationForm";
+import UserRegistrationForm from "../features/users/UserRegistrationForm";
+import BrandDashboard from "../pages/BrandDashboard";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -28,7 +32,10 @@ function App() {
             <Route path="/products" element={<Products />} />
             <Route path="products/:id" element={<Product />} />
             <Route path="rewards" element={<Rewards />} />
-            <Route path="/user" />
+            <Route path="/user/:id" element={<UserDashboard />} />
+            <Route path="/brand/:id" element={<BrandDashboard />} />
+            <Route path="/register-brand" element={<BrandRegistrationForm />} />
+            <Route path="/register-user" element={<UserRegistrationForm />} />
           </Route>
           <Route path="*" element={<PageNotFound />} />
         </Routes>
