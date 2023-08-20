@@ -32,6 +32,8 @@ FlipCoin (FP) Tokenomics:
 - Referral Rewards: Referrers receive 100 FlipCoins when their referral makes the first purchase.
 - Token Purchase by Brands: Brands can buy FlipCoins to reward loyal customers.
 
+For detailed tokenomics information, refer to the [Tokenomics](./docs/tokenomics.md) document.
+
 ## Getting Started
 
 1. Clone this repository: `git clone https://github.com/MitulVashista/FlipChain.git`
