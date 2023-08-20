@@ -32,6 +32,7 @@ export default function About() {
                     <li>
                         <Typography>
                             Cumulative Milestone Rewards (Partner Brand Loyalty): Customers will receive additional FlipCoins based on the cumulative purchase amount from partner brands as follows:
+                            <br></br> For Example:
                             <ul>
                                 <li>Up to Rs. 10,000 cumulative purchase: 1% of product amount.</li>
                                 <li>Rs. 10,001 - Rs. 30,000 cumulative purchase: 2% of product amount.</li>
