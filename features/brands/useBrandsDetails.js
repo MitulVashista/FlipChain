@@ -3,13 +3,13 @@ import { getBrandsData } from "../../services/flipKartApi";
 
 export default function useBrandsDetails() {
   const {
-    data: brandsData,
-    isLoading: isLoadingBrands,
+    data: { brandsDetails, productsDetails } = {},
+    isLoading: isLoadingBrandsDetails,
     error,
   } = useQuery({
     queryKey: ["brands"],
     queryFn: () => getBrandsData(),
     retry: false,
   });
-  return { brandsData, isLoadingBrands, error };
+  return { brandsDetails, productsDetails, isLoadingBrandsDetails, error };
 }

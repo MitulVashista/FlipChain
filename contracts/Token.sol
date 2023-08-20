@@ -1,9 +1,19 @@
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.12;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract FlipToken is ERC20("flipCoin", "FP"), Ownable {
+contract FlipToken is ERC20("flipCoin", "FP") {
+    address payable public owner;
+
+    constructor() {
+        owner = payable(msg.sender);
+    }
+
+    modifier onlyOwner() {
+        require(msg.sender == owner);
+        _;
+    }
+
     function mint(uint supply) public onlyOwner {
         _mint(msg.sender, supply * 10 ** 18);
     }
@@ -13,7 +23,7 @@ contract FlipToken is ERC20("flipCoin", "FP"), Ownable {
         uint256 value
     ) public virtual override onlyOwner returns (bool) {
         address owner = _msgSender();
-        _transfer(owner, to, value); 
+        _transfer(owner, to, value);
         return true;
     }
 

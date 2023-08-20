@@ -1,5 +1,6 @@
 import { ethers } from "ethers";
-import flipkartInstance from "../scripts/interact";
+import { flipkartInstance, signer } from "../scripts/interact";
+import JSBI from "jsbi";
 
 export async function registerBrand(
   name,
@@ -36,14 +37,178 @@ export async function registerUser(name, referralCode) {
 
 export async function getBrandsData() {
   try {
-    const brandId = await flipkartInstance.brands(0);
-    const brandDetails = await flipkartInstance.brandDetails(brandId);
-
-    console.log(brandDetails);
-    return brandDetails;
+    const brandIds = await flipkartInstance.showBrands();
+    const brandsDetails = await Promise.all(
+      Array(brandIds.length)
+        .fill()
+        .map((brandId, idx) => {
+          return flipkartInstance.brandDetails(brandIds[idx]);
+        })
+    );
+    const productsDetails = await Promise.all(
+      Array(brandIds.length)
+        .fill()
+        .map((brandId, idx) => {
+          return flipkartInstance.showBrandProducts(brandIds[idx]);
+        })
+    );
+    return { brandsDetails, productsDetails };
   } catch (err) {
     console.log(err.message);
     console.error(err);
     throw new Error("There was some error fetching brands data!");
+  }
+}
+
+export async function getBrandData() {
+  try {
+    const brandId = await flipkartInstance.brandIds(signer.address);
+    const brandData = await flipkartInstance.brandDetails(brandId);
+    const ownerTokenBalance =
+      (await flipkartInstance.showBalance(brandData[3])) / BigInt(10 ** 18);
+    return { brandData, ownerTokenBalance };
+  } catch (err) {
+    console.log(err.message);
+    console.error(err);
+    throw new Error("There was some error fetching brands data!");
+  }
+}
+
+export async function buyTokens(brandId, amount) {
+  try {
+    const tx = await flipkartInstance.buyTokens(brandId, {
+      value: ethers.parseEther(amount),
+    });
+    await tx.wait();
+  } catch (err) {
+    console.log(err.message);
+    console.error(err);
+    throw new Error("There was some error buying tokens!");
+  }
+}
+
+export async function issueTokens(brandId, tokens) {
+  try {
+    const tx = await flipkartInstance.issueTokens(brandId, tokens);
+    await tx.wait();
+  } catch (err) {
+    console.log(err.message);
+    console.error(err);
+    throw new Error("There was some error issuing tokens!");
+  }
+}
+
+export async function addProduct(brandId, name, category, imageUrl, price) {
+  try {
+    const tx = await flipkartInstance.addProduct(
+      brandId,
+      name,
+      category,
+      imageUrl,
+      ethers.parseEther(price)
+    );
+    await tx.wait();
+  } catch (err) {
+    console.log(err.message);
+    console.error(err);
+    throw new Error("There was some error adding the product!");
+  }
+}
+
+export async function getBrandProductsData(brandId) {
+  try {
+    const products = await flipkartInstance.showBrandProducts(brandId);
+    return products;
+  } catch (err) {
+    console.log(err.message);
+    console.error(err);
+    throw new Error("There was some error fetching products data!");
+  }
+}
+
+export async function addReward(brandId, discount, maxDiscountValue, tokens) {
+  try {
+    const tx = await flipkartInstance.createReward(
+      brandId,
+      discount,
+      maxDiscountValue,
+      tokens
+    );
+    await tx.wait();
+  } catch (err) {
+    console.log(err.message);
+    console.error(err);
+    throw new Error("There was some error adding the reward!");
+  }
+}
+
+export async function getBrandRewardsData(brandId) {
+  try {
+    const rewardsIds = await flipkartInstance.showBrandRewards(brandId);
+    return rewardsIds;
+  } catch (err) {
+    console.log(err.message);
+    console.error(err);
+    throw new Error("There was some error fetching rewards data!");
+  }
+}
+
+export async function getProductData(productId) {
+  try {
+    const product = await flipkartInstance.productDetails(productId);
+    return product;
+  } catch (err) {
+    console.log(err.message);
+    console.error(err);
+    throw new Error("There was some error fetching product data!");
+  }
+}
+
+export async function checkRedeemableTokens(productPrice) {
+  try {
+    let tokensToBeRedeemed;
+    const userBalance = BigInt(
+      await flipkartInstance.showBalance(signer.address)
+    );
+    let maxRedeemableTokens =
+      (BigInt(ethers.parseEther(productPrice)) * BigInt(10 ** 18)) /
+      BigInt(2 * 720000000000);
+
+    if (userBalance < maxRedeemableTokens) {
+      tokensToBeRedeemed = userBalance / BigInt(10 ** 18);
+    } else {
+      tokensToBeRedeemed = maxRedeemableTokens / BigInt(10 ** 18);
+    }
+    let priceToPay =
+      BigInt(ethers.parseEther(productPrice)) -
+      tokensToBeRedeemed * BigInt(720000000000);
+    return JSBI.BigInt(parseInt(priceToPay)) / JSBI.BigInt(10 ** 18);
+  } catch (err) {
+    console.log(err.message);
+    console.error(err);
+    throw new Error("There was some error checking redeemable tokens!");
+  }
+}
+
+export async function buyProduct(
+  brandId,
+  productId,
+  isRedeemingTokens,
+  rewardRedeemCode,
+  amount
+) {
+  try {
+    const tx = await flipkartInstance.buyProduct(
+      brandId,
+      productId,
+      isRedeemingTokens,
+      rewardRedeemCode,
+      { value: ethers.parseEther(amount) }
+    );
+    await tx.wait();
+  } catch (err) {
+    console.log(err.message);
+    console.error(err);
+    throw new Error("There was some error adding the reward!");
   }
 }

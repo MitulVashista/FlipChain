@@ -15,7 +15,7 @@ dist-ssr
 
 # Hardhat files 
 cache
-
+artifacts
 
 # Editor directories and files
 .vscode/*

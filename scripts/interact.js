@@ -1,13 +1,13 @@
 import { ethers } from "ethers";
 import { abi } from "../artifacts/contracts/FlipKart.sol/FlipKart.json";
 
-let flipkartInstance;
+let flipkartInstance, signer;
 
 if (window.ethereum) {
   const provider = new ethers.BrowserProvider(window.ethereum);
 
   // get the end user
-  const signer = await provider.getSigner();
+  signer = await provider.getSigner();
   // get the smart contract
   flipkartInstance = new ethers.Contract(
     import.meta.env.VITE_DEPLOYED_CONTRACT_ADDRESS,
@@ -25,4 +25,4 @@ if (window.ethereum) {
   );
 }
 
-export default flipkartInstance;
+export { flipkartInstance, signer };

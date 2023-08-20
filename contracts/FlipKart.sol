@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.12;
 
 import "./Token.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
@@ -11,7 +11,8 @@ contract FlipKart {
         string category;
         address payable owner;
         Product[] products;
-        Reward[] rewards;
+        uint[] rewardTokens;
+        uint[] rewardDiscount;
         bool isIssuingTokens;
         uint rewardTokensLeft;
         uint rewardPricePercentage;
@@ -21,6 +22,7 @@ contract FlipKart {
         string id;
         string name;
         string category;
+        string imageUrl;
         uint price;
         bool available;
     }
@@ -35,6 +37,9 @@ contract FlipKart {
 
     struct RedeemableReward {
         string rewardId;
+        uint discount;
+        uint maxDiscountPrice;
+        uint tokensRequired;
         string redeemCode;
     }
 
@@ -57,10 +62,10 @@ contract FlipKart {
         string rewardRedeemed;
     }
 
-    string[] public brands;
+    string[] brands;
     mapping(string => Brand) public brandDetails;
-    mapping(address => string) brandIds;
-    mapping(string => mapping(string => Product)) public productDetails;
+    mapping(address => string) public brandIds;
+    mapping(string => Product) public productDetails;
     mapping(address => User) public userDetails;
     mapping(string => mapping(string => uint)) userBrandPurchaseAmount;
     mapping(string => address) referrerUserAddress;
@@ -101,7 +106,7 @@ contract FlipKart {
         require(msg.value == 98000000000000000);
         string memory id = Strings.toHexString(
             uint256(keccak256(abi.encodePacked(name, msg.sender))),
-            32
+            4
         );
         require(brandDetails[id].owner != msg.sender);
         require(userDetails[msg.sender].account == address(0));
@@ -128,6 +133,7 @@ contract FlipKart {
         string memory brandId,
         string memory name,
         string memory category,
+        string memory imageUrl,
         uint price
     ) public {
         require(brandDetails[brandId].owner == msg.sender);
@@ -142,17 +148,16 @@ contract FlipKart {
             name: name,
             category: category,
             price: price,
+            imageUrl: imageUrl,
             available: true
         });
         brandDetails[brandId].products.push(product);
-        productDetails[brandId][productId] = product;
+        productDetails[productId] = product;
     }
 
     function registerUser(string memory name, string memory _referral) public {
         require(userDetails[msg.sender].account == address(0));
-        require(
-            brandDetails[brandIds[msg.sender]].owner == payable(address(0))
-        );
+        require(brandDetails[brandIds[msg.sender]].owner == address(0));
         string memory id = Strings.toHexString(
             uint256(keccak256(abi.encodePacked(msg.sender))),
             32
@@ -186,15 +191,15 @@ contract FlipKart {
     ) public payable {
         require(userDetails[msg.sender].account == msg.sender);
         require(brandDetails[brandId].owner != address(0));
-        require(productDetails[brandId][productId].available);
+        require(productDetails[productId].available);
         uint priceToPay;
         uint tokensToBeRedeemed;
         string memory rewardRedeemed;
         Brand storage brand = brandDetails[brandId];
         if (isRedeemingTokens) {
             uint userBalance = showBalance(msg.sender);
-            uint maxRedeemableTokens = (productDetails[brandId][productId]
-                .price * (10 ** 18)) / (2 * tokenValue);
+            uint maxRedeemableTokens = (productDetails[productId].price *
+                (10 ** 18)) / (2 * tokenValue);
 
             if (userBalance < maxRedeemableTokens) {
                 tokensToBeRedeemed = userBalance / (10 ** 18);
@@ -202,10 +207,10 @@ contract FlipKart {
                 tokensToBeRedeemed = maxRedeemableTokens / (10 ** 18);
             }
             priceToPay =
-                productDetails[brandId][productId].price -
+                productDetails[productId].price -
                 (tokensToBeRedeemed * tokenValue);
         } else {
-            priceToPay = productDetails[brandId][productId].price;
+            priceToPay = productDetails[productId].price;
             tokensToBeRedeemed = 0;
         }
 
@@ -275,7 +280,7 @@ contract FlipKart {
             FlipToken(token).mint(100 * (10 ** 18));
             FlipToken(token).transfer(msg.sender, 100 * (10 ** 18));
         }
-        uint rewardTokens = (priceToPay * (10 ** 18)) / (5 * tokenValue);
+        uint rewardTokens = (priceToPay * (10 ** 18)) / (20 * tokenValue);
         FlipToken(token).mint(rewardTokens);
         FlipToken(token).transfer(msg.sender, rewardTokens);
         uint userPurchaseAmount = userBrandPurchaseAmount[
@@ -325,23 +330,28 @@ contract FlipKart {
             uint256(keccak256(abi.encodePacked(brandId, block.timestamp))),
             32
         );
-        Reward memory reward = Reward({
+
+        rewards[id] = Reward({
             id: id,
             brandId: brandId,
             discount: discount,
             maxDiscountPrice: maxDiscountValue,
             tokensRequired: tokens
         });
-        rewards[id] = reward;
-        brandDetails[brandId].rewards.push(reward);
+        brandDetails[brandId].rewardTokens.push(tokens);
+        brandDetails[brandId].rewardDiscount.push(discount);
     }
 
     function issueReward(string memory rewardId) public {
         require(
             userRewardInvalidity[rewardId][userDetails[msg.sender].id] == false
         );
+
         RedeemableReward memory reward = RedeemableReward({
             rewardId: rewardId,
+            discount: rewards[rewardId].discount,
+            maxDiscountPrice: rewards[rewardId].maxDiscountPrice,
+            tokensRequired: rewards[rewardId].tokensRequired,
             redeemCode: generateRandomCode()
         });
         redeemableRewardValidity[userDetails[msg.sender].id][
@@ -361,23 +371,35 @@ contract FlipKart {
         );
     }
 
+    function showBrands() public view returns (string[] memory) {
+        return brands;
+    }
+
+    function showBrandRewards(
+        string memory brandId
+    ) public view returns (uint[] memory, uint[] memory) {
+        return (
+            brandDetails[brandId].rewardTokens,
+            brandDetails[brandId].rewardDiscount
+        );
+    }
+
     function showBrandProducts(
         string memory brandId
     ) public view returns (Product[] memory) {
         return brandDetails[brandId].products;
     }
 
-    function showBrandProductDetails(
-        string memory brandId,
-        string memory productId
-    ) public view returns (Product memory) {
-        return productDetails[brandId][productId];
-    }
-
     function showUserPurchaseHistory(
         address account
     ) public view returns (UserTransaction[] memory) {
         return userDetails[account].purchaseHistory;
+    }
+
+    function showUserRewards(
+        address account
+    ) public view returns (RedeemableReward[] memory) {
+        return userDetails[account].rewardsObtained;
     }
 
     function showBalance(address account) public view returns (uint) {

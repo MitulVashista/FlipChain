@@ -30,10 +30,10 @@ function App() {
           <Route element={<AppLayout />}>
             <Route index path="/" element={<Landing />} />
             <Route path="/products" element={<Products />} />
-            <Route path="products/:id" element={<Product />} />
+            <Route path="products/:brandId/:productId" element={<Product />} />
             <Route path="rewards" element={<Rewards />} />
             <Route path="/user/:id" element={<UserDashboard />} />
-            <Route path="/brand/:id" element={<BrandDashboard />} />
+            <Route path="/brand" element={<BrandDashboard />} />
             <Route path="/register-brand" element={<BrandRegistrationForm />} />
             <Route path="/register-user" element={<UserRegistrationForm />} />
           </Route>
