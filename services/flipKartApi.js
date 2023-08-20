@@ -330,3 +330,15 @@ export async function getRedeemedPrice(rewardRedeemCode, priceToPay) {
     throw new Error("There was some error fetching user data!");
   }
 }
+
+export async function getUserRewards() {
+  try {
+    const userRewards = await flipkartInstance.showUserRewards(signer.address);
+
+    return userRewards;
+  } catch (err) {
+    console.log(err.message);
+    console.error(err);
+    throw new Error("There was some error fetching user's rewards data!");
+  }
+}

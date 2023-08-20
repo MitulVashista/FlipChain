@@ -15,7 +15,7 @@ contract FlipToken is ERC20("flipCoin", "FP") {
     }
 
     function mint(uint supply) public onlyOwner {
-        _mint(msg.sender, supply * 10 ** 18);
+        _mint(msg.sender, supply);
     }
 
     function transfer(

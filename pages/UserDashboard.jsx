@@ -5,6 +5,7 @@ import Card from "../ui/Card";
 import BasicGrid from "../ui/Grid";
 import JSBI from "jsbi";
 import UserPurchaseTable from "../ui/UserPurchaseTable";
+import useUserRewards from "../features/users/useUserRewards";
 
 function UserDashboard() {
   const { isLoadingUser, userDetails, userTokenBalance } = useUserDetails();
@@ -14,7 +15,9 @@ function UserDashboard() {
     brandNames,
     productNames,
   } = useUserPurchaseHistory();
-  if (isLoadingUser || isLoadingUserPurchaseHistory) return <Spinner />;
+  const { isLoadingUserRewards, userRewards } = useUserRewards();
+  if (isLoadingUser || isLoadingUserPurchaseHistory || isLoadingUserRewards)
+    return <Spinner />;
   const rows = userPurchaseHistory.map((user, idx) => {
     return {
       transactionId: user[0],
@@ -25,7 +28,7 @@ function UserDashboard() {
       rewardRedeemed: user[6],
     };
   });
-  const cards = [
+  const userDetailCards = [
     <Card value={userDetails[1]} title="Name" />,
     <Card value={userDetails[2]} title="User account address" />,
     <Card
@@ -35,11 +38,24 @@ function UserDashboard() {
     />,
     <Card value={userTokenBalance} title="Availabe Tokens" />,
   ];
+  const userRewardDetailCards = userRewards.map((reward) => (
+    <Card
+      value={reward[0]}
+      title={`${reward[1]} discount max upto ${reward[2]}`}
+      description={`use ${reward[4]}`}
+    />
+  ));
   return (
     <div>
       <h1>User Details</h1>
-      <BasicGrid cards={cards} />
+      <BasicGrid cards={userDetailCards} />
       <UserPurchaseTable rows={rows} />
+      <h2>Redeemable Rewards</h2>
+      {userRewardDetailCards.length ? (
+        <BasicGrid cards={userRewardDetailCards} />
+      ) : (
+        "There are no redeemable vouchers! Buy vouchers using flipCoins now!"
+      )}
     </div>
   );
 }
