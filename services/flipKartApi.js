@@ -9,6 +9,7 @@ export async function registerBrand(
   rewardMilestones
 ) {
   try {
+    console.log(signer.address);
     const tx = await flipkartInstance.registerBrand(
       name,
       category,
