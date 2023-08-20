@@ -43,4 +43,4 @@ FlipCoin (FP) is the native utility token of the FlipChain Loyalty Reward Platfo
 
 3. Brands can utilize FlipCoins to attract and retain customers, as well as to promote their products.
 
-For more information about the FlipChain Loyalty Reward Platform, please refer to the [README](./README.md) of this repository.
+For more information about the FlipChain Loyalty Reward Platform, please refer to the [README](../README.md) of this repository.
