@@ -13,15 +13,20 @@ import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import AdbIcon from "@mui/icons-material/Adb";
 import { NavLink, useNavigate } from "react-router-dom";
-import { makeStyles } from "@mui/material";
+import useIsUser from "../features/users/useIsUser";
+import Spinner from "./Spinner";
+import useIsBrand from "../features/brands/useIsBrand";
 
 const pages = ["Products", "Rewards"];
 const settings = ["Profile", "Dashboard", "Logout"];
 
 function ResponsiveAppBar() {
+  const { isCheckingUser, user } = useIsUser();
+  const { isCheckingBrand, brand } = useIsBrand();
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
   const navigate = useNavigate();
+  if (isCheckingUser || isCheckingBrand) return <Spinner />;
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
   };
@@ -41,7 +46,11 @@ function ResponsiveAppBar() {
     <AppBar position="static">
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          <img src="flipkart_logo.png" alt="logo" style={{maxWidth: 30, width: 30, height: 30,  borderRadius:"60%"}}/>
+          <img
+            src="flipkart_logo.png"
+            alt="logo"
+            style={{ maxWidth: 30, width: 30, height: 30, borderRadius: "60%" }}
+          />
           <Typography
             variant="h6"
             noWrap
@@ -118,7 +127,7 @@ function ResponsiveAppBar() {
               textDecoration: "none",
             }}
           >
-            FLIPCHAIN
+            LOGO
           </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
             <Button
@@ -160,7 +169,16 @@ function ResponsiveAppBar() {
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
-              <MenuItem key="dashboard" onClick={() => navigate("brand")}>
+              <MenuItem
+                key="dashboard"
+                onClick={() => {
+                  user
+                    ? navigate("user")
+                    : brand
+                    ? navigate("brand")
+                    : navigate("/");
+                }}
+              >
                 <Typography textAlign="center">dashboard</Typography>
               </MenuItem>
             </Menu>

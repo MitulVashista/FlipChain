@@ -209,6 +209,73 @@ export async function buyProduct(
   } catch (err) {
     console.log(err.message);
     console.error(err);
-    throw new Error("There was some error adding the reward!");
+    throw new Error("There was some error buying the product!");
+  }
+}
+
+export async function getUserData() {
+  try {
+    const userDetails = await flipkartInstance.userDetails(signer.address);
+    const userTokenBalance =
+      JSBI.BigInt(
+        parseInt(await flipkartInstance.showBalance(signer.address))
+      ) / JSBI.BigInt(10 ** 18);
+    return { userDetails, userTokenBalance };
+  } catch (err) {
+    console.log(err.message);
+    console.error(err);
+    throw new Error("There was some error fetching user data!");
+  }
+}
+
+export async function isUser() {
+  try {
+    const userDetails = await flipkartInstance.userDetails(signer.address);
+    return userDetails[2] != "0x0000000000000000000000000000000000000000";
+  } catch (err) {
+    console.log(err.message);
+    console.error(err);
+    throw new Error("There was some error fetching user data!");
+  }
+}
+
+export async function isBrand() {
+  try {
+    const brandId = await flipkartInstance.brandIds(signer.address);
+    const brandDetails = await flipkartInstance.brandDetails(brandId);
+    return brandDetails[3] != "0x0000000000000000000000000000000000000000";
+  } catch (err) {
+    console.log(err.message);
+    console.error(err);
+    throw new Error("There was some error fetching user data!");
+  }
+}
+
+export async function getUserPurchaseHistory() {
+  try {
+    const userPurchaseHistory = await flipkartInstance.showUserPurchaseHistory(
+      signer.address
+    );
+    const brandDetails = await Promise.all(
+      Array(userPurchaseHistory.length)
+        .fill()
+        .map((purchase, idx) => {
+          return flipkartInstance.brandDetails(userPurchaseHistory[idx][1]);
+        })
+    );
+    const brandNames = brandDetails.map((brand) => brand[1]);
+    const productDetails = await Promise.all(
+      Array(userPurchaseHistory.length)
+        .fill()
+        .map((purchase, idx) => {
+          return flipkartInstance.productDetails(userPurchaseHistory[idx][2]);
+        })
+    );
+    const productNames = productDetails.map((product) => product[1]);
+    return { userPurchaseHistory, brandNames, productNames };
+  } catch (err) {
+    console.log(err.message);
+    console.error(err);
+    throw new Error("There was some error fetching user purchase History!");
   }
 }
