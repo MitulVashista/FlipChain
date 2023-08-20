@@ -12,6 +12,7 @@ import UserDashboard from "../pages/UserDashboard";
 import BrandRegistrationForm from "../features/brands/BrandRegistrationForm";
 import UserRegistrationForm from "../features/users/UserRegistrationForm";
 import BrandDashboard from "../pages/BrandDashboard";
+import About from "../pages/About";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -36,6 +37,7 @@ function App() {
             <Route path="/brand" element={<BrandDashboard />} />
             <Route path="/register-brand" element={<BrandRegistrationForm />} />
             <Route path="/register-user" element={<UserRegistrationForm />} />
+            <Route path="/about" element={<About />} />
           </Route>
           <Route path="*" element={<PageNotFound />} />
         </Routes>
