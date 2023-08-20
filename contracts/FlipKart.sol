@@ -11,8 +11,7 @@ contract FlipKart {
         string category;
         address payable owner;
         Product[] products;
-        uint[] rewardTokens;
-        uint[] rewardDiscount;
+        string[] rewards;
         bool isIssuingTokens;
         uint rewardTokensLeft;
         uint rewardPricePercentage;
@@ -183,6 +182,19 @@ contract FlipKart {
         FlipToken(token).transfer(msg.sender, tokensPurchased);
     }
 
+    function redeemReward(
+        string memory rewardRedeemCode,
+        uint priceToPay
+    ) public returns (uint) {
+        Reward memory reward = rewards[redeemableRewardId[rewardRedeemCode]];
+        if ((reward.discount * priceToPay) / 100 <= reward.maxDiscountPrice) {
+            priceToPay -= (reward.discount * priceToPay) / 100;
+        } else {
+            priceToPay -= reward.maxDiscountPrice;
+        }
+        return priceToPay;
+    }
+
     function buyProduct(
         string memory brandId,
         string memory productId,
@@ -219,16 +231,7 @@ contract FlipKart {
                 rewardRedeemCode
             ] == true
         ) {
-            Reward memory reward = rewards[
-                redeemableRewardId[rewardRedeemCode]
-            ];
-            if (
-                (reward.discount * priceToPay) / 100 <= reward.maxDiscountPrice
-            ) {
-                priceToPay -= (reward.discount * priceToPay) / 100;
-            } else {
-                priceToPay -= reward.maxDiscountPrice;
-            }
+            priceToPay = redeemReward(rewardRedeemCode, priceToPay);
         }
 
         require(msg.value == priceToPay);
@@ -338,8 +341,7 @@ contract FlipKart {
             maxDiscountPrice: maxDiscountValue,
             tokensRequired: tokens
         });
-        brandDetails[brandId].rewardTokens.push(tokens);
-        brandDetails[brandId].rewardDiscount.push(discount);
+        brandDetails[brandId].rewards.push(id);
     }
 
     function issueReward(string memory rewardId) public {
@@ -377,11 +379,8 @@ contract FlipKart {
 
     function showBrandRewards(
         string memory brandId
-    ) public view returns (uint[] memory, uint[] memory) {
-        return (
-            brandDetails[brandId].rewardTokens,
-            brandDetails[brandId].rewardDiscount
-        );
+    ) public view returns (string[] memory) {
+        return brandDetails[brandId].rewards;
     }
 
     function showBrandProducts(

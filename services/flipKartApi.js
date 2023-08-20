@@ -279,3 +279,54 @@ export async function getUserPurchaseHistory() {
     throw new Error("There was some error fetching user purchase History!");
   }
 }
+
+export async function issueReward(rewardId) {
+  try {
+    const tx = await flipkartInstance.issueReward(rewardId);
+    await tx.wait();
+  } catch (err) {
+    console.log(err.message);
+    console.error(err);
+    throw new Error("There was some error issuing the reward!");
+  }
+}
+
+export async function getRewardsData() {
+  try {
+    const brandIds = await flipkartInstance.showBrands();
+    const brandDetails = await Promise.all(
+      Array(brandIds.length)
+        .fill()
+        .map((brandId, idx) => {
+          return flipkartInstance.brandDetails(brandIds[idx]);
+        })
+    );
+    const brandNames = brandDetails.map((brand) => brand[1]);
+    const brandsRewards = await Promise.all(
+      Array(brandIds.length)
+        .fill()
+        .map((brandId, idx) => {
+          return flipkartInstance.showBrandRewards(brandIds[idx]);
+        })
+    );
+    return { brandsRewards, brandNames };
+  } catch (err) {
+    console.log(err.message);
+    console.error(err);
+    throw new Error("There was some error fetching rewards data!");
+  }
+}
+
+export async function getRedeemedPrice(rewardRedeemCode, priceToPay) {
+  try {
+    const price = await flipkartInstance.redeemReward(
+      rewardRedeemCode,
+      ethers.parseEther(String(priceToPay))
+    );
+    return price;
+  } catch (err) {
+    console.log(err.message);
+    console.error(err);
+    throw new Error("There was some error fetching user data!");
+  }
+}

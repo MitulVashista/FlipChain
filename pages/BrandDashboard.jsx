@@ -59,7 +59,7 @@ function BrandDashboard() {
       <IssueTokenForm brandId={id} />
       <DisplayProducts brandId={id} />
       <AddProduct brandId={id} />
-      {/* <DisplayRewards brandId={id} /> */}
+      <DisplayRewards brandId={id} />
       <AddReward brandId={id} />
     </div>
   );

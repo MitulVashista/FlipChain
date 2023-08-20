@@ -7,13 +7,19 @@ import JSBI from "jsbi";
 import MediaCard from "../ui/MediaCard";
 import { Button, Checkbox } from "@mui/material";
 import { useState } from "react";
-import { buyProduct, checkRedeemableTokens } from "../services/flipKartApi";
+import {
+  buyProduct,
+  checkRedeemableTokens,
+  getRedeemedPrice,
+} from "../services/flipKartApi";
 
 function Product() {
   const { brandId, productId } = useParams();
   const { isLoadingProduct, product, error } = useProductDetails(productId);
   const [isChecked, setIsChecked] = useState(false);
-  const [price, setIsPrice] = useState(0);
+  const [isRedeemed, setIsRedeemed] = useState(false);
+  const [price, setPrice] = useState(0);
+  const [rewardCode, setRewardCode] = useState("");
   if (isLoadingProduct) return <Spinner />;
 
   async function handleClick() {
@@ -21,7 +27,7 @@ function Product() {
     let priceToPay = await checkRedeemableTokens(
       String(JSBI.BigInt(parseInt(product[4])) / JSBI.BigInt(10 ** 18))
     );
-    setIsPrice(priceToPay);
+    setPrice(priceToPay);
   }
 
   async function handleBuy() {
@@ -37,7 +43,7 @@ function Product() {
     <Card value={product[2]} title="Product Category" />,
     <Card
       value={
-        isChecked
+        isChecked || isRedeemed
           ? `${price} ether`
           : `${JSBI.BigInt(parseInt(product[4])) / JSBI.BigInt(10 ** 18)} ether`
       }
@@ -49,6 +55,29 @@ function Product() {
       <h1>Product Details</h1>
       <BasicGrid cards={cards} />
       <Checkbox disabled={isChecked} onClick={handleClick} /> Redeem Tokens
+      <div>
+        Redeem Reward:
+        <input
+          onChange={(evt) => setRewardCode(evt.target.value)}
+          disabled={isRedeemed}
+        />
+        <Button
+          disabled={isRedeemed}
+          onClick={() => {
+            setPrice(
+              getRedeemedPrice(
+                rewardCode,
+                isChecked
+                  ? price
+                  : JSBI.BigInt(parseInt(product[4])) / JSBI.BigInt(10 ** 18)
+              )
+            );
+            setIsRedeemed(true);
+          }}
+        >
+          Redeem
+        </Button>
+      </div>
       <Button onClick={handleBuy} variant="outlined">
         Buy Product
       </Button>

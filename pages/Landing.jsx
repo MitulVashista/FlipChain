@@ -26,19 +26,16 @@ function Landing() {
       >
         <Item>
           <h1 className="display-4">Loyalty Points</h1>
-            <h4></h4>
-            <p>
-              This web application demonstrates <b>Blockchain</b> based <b>Loyalty 
-              and Rewards Program</b> using <b>Fungible Tokens</b>
-            </p>
-            <p>
-              <Button
-                  onClick={() => navigate("About")}
-                  variant="contained"
-                >
-                  learn more
-              </Button>
-            </p>
+          <h4></h4>
+          <p>
+            This web application demonstrates <b>Blockchain</b> based{" "}
+            <b>Loyalty and Rewards Program</b> using <b>Fungible Tokens</b>
+          </p>
+          <p>
+            <Button onClick={() => navigate("About")} variant="contained">
+              learn more
+            </Button>
+          </p>
         </Item>
       </Box>
       <Box sx={{ flexGrow: 1 }}>
